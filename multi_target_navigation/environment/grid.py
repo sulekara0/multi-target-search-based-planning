@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from multi_target_navigation.algorithms.bfs import BFSPlanner
+from multi_target_navigation.algorithms.astar import AStarPlanner
 
 
 
@@ -29,34 +30,35 @@ class GridEnvironment:
         sx, sy = self.start
         self.grid[sy, sx] = 1
 
-    def visualize(self, path=None):
-        plt.figure(figsize=(6, 6))
-        plt.imshow(self.grid, cmap="tab10")
-        plt.grid(True)
-        plt.xticks(range(self.width))
-        plt.yticks(range(self.height))
+    def visualize(self, path=None, label="Path", color="white"):
+       plt.figure(figsize=(6, 6))
+       plt.imshow(self.grid, cmap="tab10")
+       plt.grid(True)
+       plt.xticks(range(self.width))
+       plt.yticks(range(self.height))
 
-        # Start (Depot)
-        plt.scatter(*self.start, c="green", s=200, label="Start (Depot)")
+       # Start
+       plt.scatter(*self.start, c="green", s=200, label="Start (Depot)")
 
-        # Targets
-        for i, (x, y) in enumerate(self.targets):
-            plt.scatter(x, y, c="red", s=150)
-            plt.text(x + 0.1, y + 0.1, f"T{i}", color="black")
+       # Targets
+       for i, (x, y) in enumerate(self.targets):
+          plt.scatter(x, y, c="red", s=150)
+          plt.text(x + 0.1, y + 0.1, f"T{i}", color="black")
 
-        # Obstacles
-        if self.obstacles:
-            ox, oy = zip(*self.obstacles)
-            plt.scatter(ox, oy, c="black", s=100, label="Obstacle")
+       # Obstacles
+       if self.obstacles:
+          ox, oy = zip(*self.obstacles)
+          plt.scatter(ox, oy, c="black", s=100, label="Obstacle")
 
-        # BFS Path
-        if path:
-            px, py = zip(*path)
-            plt.plot(px, py, color="white", linewidth=3, label="BFS Path")
+       # Path
+       if path:
+          px, py = zip(*path)
+          plt.plot(px, py, color=color, linewidth=3, label=label)
 
-        plt.legend()
-        plt.title("Multi-Target Grid Environment")
-        plt.show()
+       plt.legend()
+       plt.title("Multi-Target Grid Environment")
+       plt.show()
+
 
 
 if __name__ == "__main__":
@@ -69,7 +71,13 @@ if __name__ == "__main__":
     )
 
     goal = env.targets[0]
-    planner = BFSPlanner(env.grid, env.start, goal)
-    path = planner.search()
 
-    env.visualize(path)
+    bfs = BFSPlanner(env.grid, env.start, goal)
+    bfs_path = bfs.search()
+
+    astar = AStarPlanner(env.grid, env.start, goal)
+    astar_path = astar.search()
+
+    env.visualize(bfs_path, label="BFS Path", color="white")
+    env.visualize(astar_path, label="A* Path", color="yellow")
+
