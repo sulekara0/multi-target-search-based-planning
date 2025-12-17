@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from multi_target_navigation.algorithms.bfs import BFSPlanner
 from multi_target_navigation.algorithms.astar import AStarPlanner
+from multi_target_navigation.algorithms.dijkstra import DijkstraPlanner
 
 
 
@@ -75,9 +76,14 @@ if __name__ == "__main__":
     bfs = BFSPlanner(env.grid, env.start, goal)
     bfs_path = bfs.search()
 
+    dijkstra = DijkstraPlanner(env.grid, env.start, goal)
+    dijkstra_path = dijkstra.search()
+
     astar = AStarPlanner(env.grid, env.start, goal)
     astar_path = astar.search()
 
     env.visualize(bfs_path, label="BFS Path", color="white")
+    env.visualize(dijkstra_path, label="Dijkstra Path", color="cyan")
     env.visualize(astar_path, label="A* Path", color="yellow")
+
 
