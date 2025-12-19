@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 from multi_target_navigation.algorithms.bfs import BFSPlanner
 from multi_target_navigation.algorithms.astar import AStarPlanner
 from multi_target_navigation.algorithms.dijkstra import DijkstraPlanner
-
+from multi_target_navigation.vrp.distance_matrix import compute_distance
+from multi_target_navigation.vrp.greedy_vrp import greedy_vrp
+from multi_target_navigation.vrp.multi_target_path import build_full_path
 
 
 class GridEnvironment:
@@ -59,9 +61,7 @@ class GridEnvironment:
        plt.legend()
        plt.title("Multi-Target Grid Environment")
        plt.show()
-
-
-
+       
 if __name__ == "__main__":
     env = GridEnvironment(
         width=10,
@@ -71,6 +71,9 @@ if __name__ == "__main__":
         obstacles=[(4, 4), (4, 5), (5, 4)]
     )
 
+    # ----------------------------
+    # Single-target comparison
+    # ----------------------------
     goal = env.targets[0]
 
     bfs = BFSPlanner(env.grid, env.start, goal)
@@ -86,4 +89,27 @@ if __name__ == "__main__":
     env.visualize(dijkstra_path, label="Dijkstra Path", color="cyan")
     env.visualize(astar_path, label="A* Path", color="yellow")
 
+    # ----------------------------
+    # VRP comparison
+    # ----------------------------
+    points = [env.start] + env.targets
 
+    dist_bfs = compute_distance(env.grid, points, method="bfs")
+    dist_dijkstra = compute_distance(env.grid, points, method="dijkstra")
+    dist_astar = compute_distance(env.grid, points, method="astar")
+
+    order_bfs, cost_bfs = greedy_vrp(dist_bfs)
+    order_dij, cost_dij = greedy_vrp(dist_dijkstra)
+    order_astar, cost_astar = greedy_vrp(dist_astar)
+
+    print("BFS VRP Order:", order_bfs, "Cost:", cost_bfs)
+    print("Dijkstra VRP Order:", order_dij, "Cost:", cost_dij)
+    print("A* VRP Order:", order_astar, "Cost:", cost_astar)
+
+    full_path_bfs = build_full_path(env, order_bfs, BFSPlanner)
+    full_path_dij = build_full_path(env, order_dij, DijkstraPlanner)
+    full_path_astar = build_full_path(env, order_astar, AStarPlanner)
+
+    env.visualize(full_path_bfs, label="BFS + VRP", color="white")
+    env.visualize(full_path_dij, label="Dijkstra + VRP", color="cyan")
+    env.visualize(full_path_astar, label="A* + VRP", color="yellow")

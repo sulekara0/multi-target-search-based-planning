@@ -1,6 +1,5 @@
 import heapq
 
-
 class AStarPlanner:
     def __init__(self, grid, start, goal):
         self.grid = grid
@@ -8,15 +7,14 @@ class AStarPlanner:
         self.goal = goal
         self.height = grid.shape[0]
         self.width = grid.shape[1]
+        self.nodes_visited = 0  # ANALİZ İÇİN EKLENDİ
 
     def heuristic(self, a, b):
-        # Manhattan distance
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
     def get_neighbors(self, node):
         x, y = node
         neighbors = []
-
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.width and 0 <= ny < self.height:
@@ -30,9 +28,11 @@ class AStarPlanner:
 
         came_from = {self.start: None}
         g_score = {self.start: 0}
+        self.nodes_visited = 0
 
         while open_set:
             _, current = heapq.heappop(open_set)
+            self.nodes_visited += 1  # SAYAÇ ARTIRMA
 
             if current == self.goal:
                 return self.reconstruct_path(came_from)
@@ -55,3 +55,4 @@ class AStarPlanner:
             path.append(current)
             current = came_from[current]
         return path[::-1]
+    
